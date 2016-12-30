@@ -1,0 +1,135 @@
+<html>
+  <head>
+    <title>Canvas tutorial</title>
+    <script type="text/javascript">
+
+      var contents = ["tutorial", "sample", "test", "play", "apple"];
+      var time = 0;
+
+      function shuffle (contents)
+      {
+        for(var i = contents.length - 1; i > 0; i--){
+            var r = Math.floor(Math.random() * (i + 1));
+            var tmp = contents[i];
+            contents[i] = contents[r];
+            contents[r] = tmp;
+        }        
+      }
+
+      shuffle(contents);
+
+      function draw(){
+        var canvas = document.getElementById('tutorial');
+        if (canvas.getContext){
+          var context = canvas.getContext('2d');
+
+          // 文字の初期設定
+          context.font = "20px 'Times New Roman'";
+
+          var content    = contents.shift();
+          var currentIdx = 0;
+          var score      = 0;
+          var scoreBase  = 10;
+          var isFinished = false;
+          var missTypeCount = 0;
+          
+          var timerObj = setInterval(timer, 1000);
+          drawContent();
+
+          // context.fillText('keyCode: ', 30, 40);
+          // context.fillRect(20,40,50,100);
+          // context.strokeStyle = 'rgb(00,00,255)'; //枠線の色は青
+          // context.fillStyle = 'rgb(255,00,00)'; //塗りつぶしの色は赤
+          // context.strokeRect(200,80,100,50);
+          // context.arc(150,75,60,Math.PI*1,Math.PI*2,true);
+          // context.fill();
+
+          function timer ()
+          {
+              time++;
+              context.clearRect(0, 0, canvas.width, 100);
+              context.fillText("TIME:"+time+"s", 10, 50);  
+          }
+
+
+          function drawContent()
+          {
+            context.clearRect(0, 100, canvas.width, canvas.height);
+
+            for (var idx=0; idx<content.length; idx++) {
+              context.fillStyle = "blue"; //塗り潰し色を緑に
+              context.fillText("SCORE:"+score, 10, 140);
+
+              var xPos = (idx * 10) + 30 ;
+              if (idx < currentIdx) {
+                context.fillStyle = "red"; //塗り潰し色を緑に
+              } else {
+                context.fillStyle = "black"; //塗り潰し色を緑に
+              }
+
+              context.fillText(content[idx], xPos , 240);
+            }
+          }
+
+          function drawResult()
+          {
+            context.clearRect(0, 50, canvas.width, canvas.height);
+            clearInterval(timerObj);
+            context.fillText("GAME FINISHED!!", 40, 200);
+            context.fillText("SCORE:"+score, 40, 240);
+
+          }
+
+          document.addEventListener("keydown", KeyDownFunc);
+          document.addEventListener("keyup", KeyUpFunc);
+
+          function KeyDownFunc(e)
+          {
+            if (isFinished) return;
+
+            var pressedKey = String.fromCharCode(e.keyCode).toLowerCase();
+            if (pressedKey === content[currentIdx]) {
+              currentIdx++;
+              drawContent();
+            }  else {
+              missTypeCount++;
+            }
+          }
+
+          function KeyUpFunc(e)
+          {
+            if (isFinished) return;
+
+              if (currentIdx >= content.length) {
+                
+                currentIdx = 0;
+                score  += content.length * scoreBase;
+                score  -= missTypeCount;
+                if (contents.length > 0) {
+                  missTypeCount =  0;
+                  content = contents.shift();
+                  drawContent();
+                  context.fillText("Collect!!", 40, 100);
+                } else {
+                  isFinished = true;
+                  drawResult();
+                }
+              }
+
+
+              // context.clearRect(0, canvas.height/2, canvas.width, canvas.height);
+              // context.fillText('keyup', 20, 20 + canvas.height/2);
+              // context.fillText('keyCode: '+e.keyCode, 30, 40 + canvas.height/2);
+          }
+
+        }
+      }
+    </script>
+    <style type="text/css">
+      canvas { border: 1px solid #999; }
+    </style>
+  </head>
+  <body onload="draw();">
+    <canvas id="tutorial" width="400" height="300"></canvas>
+  </body>
+</html>
